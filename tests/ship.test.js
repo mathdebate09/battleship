@@ -1,4 +1,4 @@
-const Ship = require('../src/modules/gameBoard.js');
+const Ship = require('../src/modules/ship.js');
 
 describe('Ship', () => {
     let ship;
