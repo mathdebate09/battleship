@@ -2,11 +2,11 @@ const Ship = require("./ship.js");
 const GameBoard = require("./gameBoard.js");
 import { gameLoop } from "./gameLoop.js";
 
-const displayController = (function () { 
+const displayController = (function () {
     let direction = "vertical";
     function placeShipModal() {
         const dialog = document.createElement("dialog");
-        dialog.setAttribute("open", "");
+        dialog.open = true;
 
         const dialogHeader = document.createElement("p");
         dialogHeader.textContent = "LAYOUT YOUR SHIPS";
@@ -70,11 +70,46 @@ const displayController = (function () {
                         lastColoredCells.forEach(cell => cell.style.backgroundColor = '');
                         lastColoredCells = [];
 
-                        const ship = gameLoop.userBoard.boardPieces[currentShipIndex];
+                        if (currentShipIndex < gameLoop.userBoard.boardPieces.length) {
+                            const ship = gameLoop.userBoard.boardPieces[currentShipIndex];
+                            ship.alignment = direction; // Use the direction variable to determine the ship's alignment
 
-                        // Check if the ship can be placed at the hovered location
-                        if (rowIndex + ship.length <= 13 && colIndex + ship.length <= 13) {
-                            // Color the cells based on the ship's length and alignment
+                            // Check if the ship can be placed at the hovered location
+                            if ((ship.alignment === 'vertical' && rowIndex + ship.length <= 10) ||
+                                (ship.alignment === 'horizontal' && colIndex + ship.length <= 10)) {
+                                // Color the cells based on the ship's length and alignment
+                                for (let j = 0; j < ship.length; j++) {
+                                    let cellToColor;
+
+                                    if (ship.alignment === 'horizontal') {
+                                        cellToColor = rows[rowIndex][colIndex + j];
+                                    } else { // ship.alignment === 'vertical'
+                                        cellToColor = rows[rowIndex + j][colIndex];
+                                    }
+
+                                    if (cellToColor) {
+                                        cellToColor.style.backgroundColor = '#CCC5B9';
+                                        lastColoredCells.push(cellToColor);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+
+                div.addEventListener('click', () => {
+                    if (currentShipIndex < gameLoop.userBoard.boardPieces.length && !gameLoop.userBoard.isAdjacentOccupied(rowIndex, colIndex)) {
+                        const ship = gameLoop.userBoard.boardPieces[currentShipIndex];
+                        ship.alignment = direction; // Use the direction variable to determine the ship's alignment
+
+                        // Check if the ship can be placed at the clicked location
+                        if ((ship.alignment === 'vertical' && rowIndex + ship.length <= 10) ||
+                            (ship.alignment === 'horizontal' && colIndex + ship.length <= 10) &&
+                            !gameLoop.userBoard.isAdjacentOccupied(rowIndex, colIndex)) {
+                            gameLoop.userBoard.placeShip(ship, rowIndex, colIndex, ship.alignment);
+                            currentShipIndex++;
+
+                            // Color the cells that represent the ship's location
                             for (let j = 0; j < ship.length; j++) {
                                 let cellToColor;
 
@@ -85,89 +120,21 @@ const displayController = (function () {
                                 }
 
                                 if (cellToColor) {
-                                    cellToColor.style.backgroundColor = '#CCC5B9';
-                                    lastColoredCells.push(cellToColor);
+                                    cellToColor.classList.add('ship-location');
                                 }
                             }
                         }
                     }
-                });
 
-                div.addEventListener('click', () => {
-                    const ship = gameLoop.userBoard.boardPieces[currentShipIndex];
-
-                    // Check if the ship can be placed at the clicked location
-                    if (rowIndex + ship.length <= 13 && colIndex + ship.length <= 13) {
-                        gameLoop.userBoard.placeShip(ship, rowIndex, colIndex, ship.alignment);
-                        currentShipIndex++;
+                    if (currentShipIndex === gameLoop.userBoard.boardPieces.length) {
+                        const dialog = document.querySelector("dialog");
+                        dialog.parentNode.removeChild(dialog);
+                        console.log(gameLoop.userBoard)  
                     }
                 });
             });
         });
     }
-
-    // function placeShipsOnModal() {
-    //     const board = document.querySelector(".board");
-    //     const gameBoard = gameLoop.userBoard;
-    
-    //     let currentShipIndex = 0;
-    //     let lastHoveredCell = null;
-    //     let lastColoredCells = [];
-    
-    //     board.addEventListener("mouseover", function (event) {
-    //         if (event.target.classList.contains("e")) {
-    //             const cell = event.target;
-    //             const x = parseInt(cell.dataset.x);
-    //             const y = parseInt(cell.dataset.y);
-    
-    //             // Only color the cells if the mouse has moved to a new cell
-    //             if (lastHoveredCell !== cell) {
-    //                 lastHoveredCell = cell;
-    
-    //                 // Uncolor the cells that were colored during the last hover event
-    //                 lastColoredCells.forEach(cell => cell.style.backgroundColor = '');
-    //                 lastColoredCells = [];
-    
-    //                 const ship = gameBoard.boardPieces[currentShipIndex];
-    
-    //                 if (!gameBoard.isAdjacentOccupied(x, y) && gameBoard.canPlaceShip(ship, x, y, ship.alignment)) {
-    //                     ship.setCoordinates([x, y], ship.alignment);
-    
-    //                     // Color the cells based on the ship's length and alignment
-    //                     for (let j = 0; j < ship.length; j++) {
-    //                         let cellsToColor;
-    
-    //                         if (ship.alignment === 'horizontal') {
-    //                             cellsToColor = document.querySelectorAll(`.e[data-x='${x + j}'][data-y='${y}']`);
-    //                         } else { // ship.alignment === 'vertical'
-    //                             cellsToColor = document.querySelectorAll(`.e[data-x='${x}'][data-y='${y + j}']`);
-    //                         }
-    
-    //                         cellsToColor.forEach(cellToColor => {
-    //                             cellToColor.style.backgroundColor = '#CCC5B9';
-    //                             lastColoredCells.push(cellToColor);
-    //                         });
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //     });
-    
-    //     board.addEventListener("click", function (event) {
-    //         if (event.target.classList.contains("e")) {
-    //             const cell = event.target;
-    //             const x = parseInt(cell.dataset.x);
-    //             const y = parseInt(cell.dataset.y);
-    
-    //             const ship = gameBoard.boardPieces[currentShipIndex];
-    
-    //             if (!gameBoard.isAdjacentOccupied(x, y) && gameBoard.canPlaceShip(ship, x, y, ship.alignment)) {
-    //                 gameBoard.placeShip(ship, x, y, ship.alignment);
-    //                 currentShipIndex++;
-    //             }
-    //         }
-    //     });
-    // }
 
     return { placeShipModal, placeShipsOnModal };
 })();
