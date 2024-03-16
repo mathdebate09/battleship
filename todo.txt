@@ -1,4 +1,45 @@
-import Ship from './ship.js'
+User
+ship.js 
+
+class Ship {
+    constructor(length) {
+        this.length = length;
+        this.numHits = 0;
+        this.sunk = false;
+        this.alignment = null;
+        this.coordinates = [];
+    }
+
+    hit() {
+        if(!this.sunk) {
+            this.numHits++;
+            this.isSunk();
+        }
+    }
+
+    isSunk() {
+        if(this.numHits === this.length) {
+            this.sunk = true;
+        }
+    }
+
+    setCoordinates(startPoint, alignment) {
+        this.alignment = alignment;
+        this.coordinates = [];
+        for (let i = 0; i < this.length; i++) {
+            if (alignment === 'horizontal') {
+                this.coordinates.push([startPoint[0], startPoint[1] + i]);
+            } else if (alignment === 'vertical') {
+                this.coordinates.push([startPoint[0] + i, startPoint[1]]);
+            }
+        }
+    }
+}
+
+module.exports = Ship;
+
+GameBoard.js
+const Ship = require('./ship.js')
 
 class GameBoard {
     constructor() {
@@ -65,7 +106,7 @@ class GameBoard {
     }
 
     populateShipsRandomly() {
-        
+        return new Promise((resolve) => {
             this.boardPieces.forEach(ship => {
                 let row, col, direction;
                 do {
@@ -76,6 +117,8 @@ class GameBoard {
 
                 this.placeShip(ship, row, col, direction);
             });
+            resolve();
+        });
     }
 
     canPlaceShip(ship, row, col, direction) {
@@ -118,4 +161,74 @@ class GameBoard {
     }
 }
 
-export default GameBoard;
+module.exports = GameBoard;
+
+gameLoop.js
+
+const Ship = require('./ship.js')
+const GameBoard = require('./gameBoard.js')
+import { displayController } from './displayController.js';
+
+const gameLoop = (function () {
+    const userBoard = new GameBoard()
+    const computerBoard = new GameBoard()
+    let currentPlayer = 'user';
+
+    function switchPlayer() {
+        currentPlayer = currentPlayer === 'user' ? 'computer' : 'user';
+    }
+
+    function startGame() {
+        displayController.placeShipModal();
+        displayController.placeShipsOnModal();
+        computerBoard.populateShipsRandomly();
+        playGame()
+    }
+
+    function playGame() {
+        while (!userBoard.areAllShipsSunk() && !computerBoard.areAllShipsSunk()) {
+            displayController.takeTurn()
+            switchPlayer();
+        }
+
+        if (userBoard.areAllShipsSunk()) {
+            console.log('Computer wins!');
+        } else {
+            console.log('User wins!');
+        }
+    }
+
+
+    let usedCoordinates = new Set();
+
+    function computerTurn() {
+        let row, col;
+        do {
+            row = Math.floor(Math.random() * 10);
+            col = Math.floor(Math.random() * 10);
+        } while (usedCoordinates.has(`${row},${col}`));
+
+        usedCoordinates.add(`${row},${col}`);
+        return [row, col];
+    }
+
+
+
+    return {
+        startGame,computerTurn,
+        userBoard: userBoard, computerBoard: computerBoard
+    }
+})();
+
+export { gameLoop };
+
+import "./styles/main.css";
+import "./modules/icon.js";
+import "./modules/skeleton.js";
+import "./modules/gameLoop.js";
+import { displayController } from './modules/displayController.js';
+import { gameLoop } from './modules/gameLoop.js';
+
+gameLoop.startGame();
+
+index.js

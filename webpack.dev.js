@@ -5,6 +5,11 @@ module.exports = {
   mode: "development",
   entry: {
     index: "./src/index.js",
+    skeleton: "./src/modules/skeleton.js",
+    displayController: "./src/modules/displayController.js",
+    gameBoard: "./src/modules/gameBoard.js",
+    gameLoop: "./src/modules/gameLoop.js",
+    ship: "./src/modules/ship.js"
   },
   devtool: "inline-source-map",
   devServer: {

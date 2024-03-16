@@ -183,6 +183,19 @@ dialog button {
   background-color: #CCC5B9;
 }
 
+/* BOARD */
+.s {
+  background-color: #CCC5B9;
+}
+
+.h {
+  background-color:var(--red);
+}
+
+.m {
+  background-color:var(--green);
+}
+
 /* FOOTER */
 .footer {
   font-family: var(--normal);
