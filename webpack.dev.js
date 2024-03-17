@@ -9,7 +9,7 @@ module.exports = {
     displayController: "./src/modules/displayController.js",
     gameBoard: "./src/modules/gameBoard.js",
     gameLoop: "./src/modules/gameLoop.js",
-    ship: "./src/modules/ship.js"
+    ship: "./src/modules/ship.js",
   },
   devtool: "inline-source-map",
   devServer: {
